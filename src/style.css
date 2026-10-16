@@ -102,6 +102,20 @@ canvas {
   background: #34d399;
 }
 
+#crosshair.ads .ch-line {
+  background: #38bdf8;
+  box-shadow: 0 0 6px #38bdf8;
+}
+
+#crosshair.ads .ch-top { top: 3px; height: 4px; }
+#crosshair.ads .ch-bottom { bottom: 3px; height: 4px; }
+#crosshair.ads .ch-left { left: 3px; width: 4px; }
+#crosshair.ads .ch-right { right: 3px; width: 4px; }
+#crosshair.ads .ch-dot { background: #38bdf8; width: 3px; height: 3px; top: 10.5px; left: 10.5px; box-shadow: 0 0 8px #38bdf8; }
+
+.btn-aim { background: #2563eb !important; border-color: #60a5fa !important; }
+
+
 /* Hitmarker */
 #hitmarker {
   position: absolute;

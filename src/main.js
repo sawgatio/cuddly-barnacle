@@ -1,14 +1,15 @@
 // ============================================================================
-// Tactical Strike V2 - 3D Tactical FPS Engine (Three.js & PeerJS Netcode)
+// Tactical Strike V2 - Master Tactical FPS Engine (Three.js & PeerJS Netcode)
 // ============================================================================
 
 import * as THREE from 'three';
 import Peer from 'peerjs';
 
-// --- Global Audio Synthesizer (Zero External File Dependencies) ---
+// --- Cinema-Grade Tactical Procedural Audio Engine ---
 class TacticalAudioEngine {
   constructor() {
     this.ctx = null;
+    this.lastFootstepTime = 0;
   }
 
   init() {
@@ -25,101 +26,117 @@ class TacticalAudioEngine {
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
 
-    const bufferSize = this.ctx.sampleRate * 0.15;
-    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (this.ctx.sampleRate * 0.03));
+    // 1. High-pressure mechanical crack
+    const crackLen = this.ctx.sampleRate * 0.05;
+    const crackBuf = this.ctx.createBuffer(1, crackLen, this.ctx.sampleRate);
+    const cData = crackBuf.getChannelData(0);
+    for (let i = 0; i < crackLen; i++) {
+      cData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (this.ctx.sampleRate * 0.01));
     }
+    const crack = this.ctx.createBufferSource();
+    crack.buffer = crackBuf;
+    const crackFilter = this.ctx.createBiquadFilter();
+    crackFilter.type = 'highpass';
+    crackFilter.frequency.setValueAtTime(1800, now);
+    crack.connect(crackFilter);
+    crackFilter.connect(this.ctx.destination);
+    crack.start(now);
 
-    const noise = this.ctx.createBufferSource();
-    noise.buffer = buffer;
+    // 2. Heavy Sub-Bass Gunshot Body
+    const subOsc = this.ctx.createOscillator();
+    const subGain = this.ctx.createGain();
+    subOsc.type = 'sine';
+    subOsc.frequency.setValueAtTime(220, now);
+    subOsc.frequency.exponentialRampToValueAtTime(38, now + 0.14);
 
-    const filter = this.ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(3500, now);
-    filter.frequency.exponentialRampToValueAtTime(100, now + 0.15);
+    subGain.gain.setValueAtTime(1.1, now);
+    subGain.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
 
-    const gain = this.ctx.createGain();
-    gain.gain.setValueAtTime(0.7, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+    subOsc.connect(subGain);
+    subGain.connect(this.ctx.destination);
+    subOsc.start(now);
+    subOsc.stop(now + 0.14);
 
-    noise.connect(filter);
-    filter.connect(gain);
-    gain.connect(this.ctx.destination);
-    noise.start(now);
+    // 3. Reverberant room explosion tail
+    const roarLen = this.ctx.sampleRate * 0.25;
+    const roarBuf = this.ctx.createBuffer(1, roarLen, this.ctx.sampleRate);
+    const rData = roarBuf.getChannelData(0);
+    for (let i = 0; i < roarLen; i++) {
+      rData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (this.ctx.sampleRate * 0.06));
+    }
+    const roar = this.ctx.createBufferSource();
+    roar.buffer = roarBuf;
+    const roarFilter = this.ctx.createBiquadFilter();
+    roarFilter.type = 'lowpass';
+    roarFilter.frequency.setValueAtTime(2800, now);
+    roarFilter.frequency.exponentialRampToValueAtTime(120, now + 0.25);
 
-    const osc = this.ctx.createOscillator();
-    const oscGain = this.ctx.createGain();
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(150, now);
-    osc.frequency.exponentialRampToValueAtTime(30, now + 0.12);
+    const roarGain = this.ctx.createGain();
+    roarGain.gain.setValueAtTime(0.7, now);
+    roarGain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
 
-    oscGain.gain.setValueAtTime(0.8, now);
-    oscGain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
-
-    osc.connect(oscGain);
-    oscGain.connect(this.ctx.destination);
-    osc.start(now);
-    osc.stop(now + 0.12);
+    roar.connect(roarFilter);
+    roarFilter.connect(roarGain);
+    roarGain.connect(this.ctx.destination);
+    roar.start(now);
   }
 
   playPistolShot() {
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
 
-    const bufferSize = this.ctx.sampleRate * 0.1;
-    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (this.ctx.sampleRate * 0.02));
-    }
-
-    const noise = this.ctx.createBufferSource();
-    noise.buffer = buffer;
-
-    const filter = this.ctx.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.frequency.setValueAtTime(2200, now);
-    filter.Q.value = 3.0;
-
+    const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
-    gain.gain.setValueAtTime(0.6, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(320, now);
+    osc.frequency.exponentialRampToValueAtTime(60, now + 0.09);
 
-    noise.connect(filter);
-    filter.connect(gain);
+    gain.gain.setValueAtTime(0.8, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.09);
+
+    osc.connect(gain);
     gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.09);
+
+    // Snappy crack
+    const noiseLen = this.ctx.sampleRate * 0.08;
+    const noiseBuf = this.ctx.createBuffer(1, noiseLen, this.ctx.sampleRate);
+    const nData = noiseBuf.getChannelData(0);
+    for (let i = 0; i < noiseLen; i++) {
+      nData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (this.ctx.sampleRate * 0.015));
+    }
+    const noise = this.ctx.createBufferSource();
+    noise.buffer = noiseBuf;
+    const nFilter = this.ctx.createBiquadFilter();
+    nFilter.type = 'bandpass';
+    nFilter.frequency.setValueAtTime(2400, now);
+    nFilter.Q.value = 2.5;
+
+    noise.connect(nFilter);
+    nFilter.connect(this.ctx.destination);
     noise.start(now);
   }
 
-  playExplosion() {
+  playHeadshotDink() {
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
 
-    const bufferSize = this.ctx.sampleRate * 0.6;
-    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (this.ctx.sampleRate * 0.15));
-    }
+    // Dual harmonized metallic dink
+    [2400, 3200].forEach(freq => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now);
 
-    const noise = this.ctx.createBufferSource();
-    noise.buffer = buffer;
+      gain.gain.setValueAtTime(0.45, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
 
-    const filter = this.ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(800, now);
-    filter.frequency.exponentialRampToValueAtTime(40, now + 0.6);
-
-    const gain = this.ctx.createGain();
-    gain.gain.setValueAtTime(1.2, now);
-    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
-
-    noise.connect(filter);
-    filter.connect(gain);
-    gain.connect(this.ctx.destination);
-    noise.start(now);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.12);
+    });
   }
 
   playHitSound() {
@@ -128,8 +145,26 @@ class TacticalAudioEngine {
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(1200, now);
-    osc.frequency.setValueAtTime(1600, now + 0.03);
+    osc.frequency.setValueAtTime(1100, now);
+    osc.frequency.setValueAtTime(1500, now + 0.03);
+
+    gain.gain.setValueAtTime(0.35, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.08);
+  }
+
+  playGrenadePin() {
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1800, now);
+    osc.frequency.exponentialRampToValueAtTime(2400, now + 0.08);
 
     gain.gain.setValueAtTime(0.3, now);
     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
@@ -140,15 +175,97 @@ class TacticalAudioEngine {
     osc.stop(now + 0.08);
   }
 
+  playGrenadeBounce() {
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(240, now);
+    osc.frequency.exponentialRampToValueAtTime(80, now + 0.07);
+
+    gain.gain.setValueAtTime(0.35, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.07);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.07);
+  }
+
+  playExplosion() {
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+
+    // Deep earthquake sub-bass rumble
+    const subOsc = this.ctx.createOscillator();
+    const subGain = this.ctx.createGain();
+    subOsc.type = 'sine';
+    subOsc.frequency.setValueAtTime(90, now);
+    subOsc.frequency.exponentialRampToValueAtTime(22, now + 0.9);
+
+    subGain.gain.setValueAtTime(1.4, now);
+    subGain.gain.exponentialRampToValueAtTime(0.01, now + 0.9);
+
+    subOsc.connect(subGain);
+    subGain.connect(this.ctx.destination);
+    subOsc.start(now);
+    subOsc.stop(now + 0.9);
+
+    // Blast noise envelope
+    const bufferSize = this.ctx.sampleRate * 0.8;
+    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (this.ctx.sampleRate * 0.22));
+    }
+    const noise = this.ctx.createBufferSource();
+    noise.buffer = buffer;
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(950, now);
+    filter.frequency.exponentialRampToValueAtTime(45, now + 0.8);
+
+    const gain = this.ctx.createGain();
+    gain.gain.setValueAtTime(1.3, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.ctx.destination);
+    noise.start(now);
+  }
+
+  playFootstep() {
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    if (now - this.lastFootstepTime < 0.32) return;
+    this.lastFootstepTime = now;
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(90, now);
+    osc.frequency.exponentialRampToValueAtTime(40, now + 0.05);
+
+    gain.gain.setValueAtTime(0.12, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.05);
+  }
+
   playReload() {
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
     osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(300, now);
-    osc.frequency.exponentialRampToValueAtTime(800, now + 0.2);
-    gain.gain.setValueAtTime(0.2, now);
+    osc.frequency.setValueAtTime(320, now);
+    osc.frequency.exponentialRampToValueAtTime(780, now + 0.2);
+    gain.gain.setValueAtTime(0.25, now);
     gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
 
     osc.connect(gain);
@@ -163,7 +280,7 @@ class TacticalAudioEngine {
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
     osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(90, now);
+    osc.frequency.setValueAtTime(95, now);
     osc.frequency.linearRampToValueAtTime(40, now + 0.18);
     gain.gain.setValueAtTime(0.4, now);
     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
@@ -193,7 +310,7 @@ class TacticalAudioEngine {
 
 const audio = new TacticalAudioEngine();
 
-// --- Game Engine Core ---
+// --- Main Tactical Strike Game Engine ---
 class TacticalGame {
   constructor() {
     this.container = document.getElementById('game-container');
@@ -206,20 +323,30 @@ class TacticalGame {
     this.renderer = null;
     this.clock = new THREE.Clock();
 
-    // Map collision colliders
+    // Map collision colliders & entities
     this.colliders = [];
     this.grenades = [];
     this.bots = [];
+    this.tracers = [];
+    this.vfxEntities = [];
 
     // Weapon Inventory & Slots
-    this.currentSlot = 1; // 1: AR-556, 2: P-900, 3: Frag Grenade
+    this.currentSlot = 1;
     this.weapons = {
-      1: { name: 'TACTICAL AR-556', clip: 30, maxClip: 30, reserve: 90, fireRate: 0.11, damage: 35, auto: true },
-      2: { name: 'TACTICAL P-900', clip: 15, maxClip: 15, reserve: 45, fireRate: 0.18, damage: 28, auto: false }
+      1: { name: 'TACTICAL AR-556', clip: 30, maxClip: 30, reserve: 90, fireRate: 0.11, damage: 35, headDamage: 140 },
+      2: { name: 'TACTICAL P-900', clip: 15, maxClip: 15, reserve: 45, fireRate: 0.18, damage: 28, headDamage: 85 }
     };
     this.grenadeCount = 2;
     this.isReloading = false;
     this.lastFireTime = 0;
+
+    // Aim Down Sights (ADS)
+    this.isAiming = false;
+    this.baseFov = 75;
+    this.targetFov = 75;
+    this.gunDefaultPos = new THREE.Vector3(0.25, -0.22, -0.45);
+    this.gunAdsPos = new THREE.Vector3(0.0, -0.165, -0.38); // Centered holo optic
+    this.targetGunPos = this.gunDefaultPos.clone();
 
     // Viewmodel Meshes
     this.gunMesh = null;
@@ -255,7 +382,7 @@ class TacticalGame {
     this.interactionProgress = 0;
 
     // Mode Configuration
-    this.gameMode = 'solo'; // 'solo' | 'bots'
+    this.gameMode = 'solo';
     this.botCount = 2;
     this.botDifficulty = 'regular';
 
@@ -285,7 +412,7 @@ class TacticalGame {
     this.scene.background = new THREE.Color(0x0a0e17);
     this.scene.fog = new THREE.FogExp2(0x0a0e17, 0.015);
 
-    this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    this.camera = new THREE.PerspectiveCamera(this.baseFov, window.innerWidth / window.innerHeight, 0.1, 1000);
     this.camera.position.set(0, this.cameraHeight, 15);
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
@@ -295,10 +422,10 @@ class TacticalGame {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.container.appendChild(this.renderer.domElement);
 
-    const hemiLight = new THREE.HemisphereLight(0x94a3b8, 0x1e293b, 0.8);
+    const hemiLight = new THREE.HemisphereLight(0x94a3b8, 0x1e293b, 0.85);
     this.scene.add(hemiLight);
 
-    const sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    const sunLight = new THREE.DirectionalLight(0xffffff, 1.3);
     sunLight.position.set(25, 40, 20);
     sunLight.castShadow = true;
     sunLight.shadow.mapSize.width = 1024;
@@ -317,7 +444,7 @@ class TacticalGame {
   setupArenaMap() {
     // 1. Concrete Ground Floor
     const floorGeo = new THREE.PlaneGeometry(60, 60);
-    const floorMat = new THREE.MeshStandardMaterial({ color: 0x1c2331, roughness: 0.8, metalness: 0.2 });
+    const floorMat = new THREE.MeshStandardMaterial({ color: 0x18202f, roughness: 0.8, metalness: 0.2 });
     const floor = new THREE.Mesh(floorGeo, floorMat);
     floor.rotation.x = -Math.PI / 2;
     floor.receiveShadow = true;
@@ -375,7 +502,7 @@ class TacticalGame {
     siteMarker.position.set(0, 0.05, 0);
     this.scene.add(siteMarker);
 
-    // Practice target dummies
+    // Practice target dummies with generous hitboxes
     this.targetDummies = [];
     this.createTargetDummy(5, 0, -12);
     this.createTargetDummy(-10, 0, -8);
@@ -386,14 +513,20 @@ class TacticalGame {
     const group = new THREE.Group();
     group.position.set(x, y, z);
 
+    // Generous outer hitbox cylinder (ensures accurate hits from distance)
+    const hitBoxMat = new THREE.MeshBasicMaterial({ visible: false });
+    const hitBox = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 1.9, 8), hitBoxMat);
+    hitBox.position.y = 0.95;
+    group.add(hitBox);
+
     const bodyMat = new THREE.MeshStandardMaterial({ color: 0xef4444, roughness: 0.5 });
-    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 1.2, 12), bodyMat);
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 1.2, 12), bodyMat);
     body.position.y = 0.9;
     body.castShadow = true;
     group.add(body);
 
     const headMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.4 });
-    const head = new THREE.Mesh(new THREE.SphereGeometry(0.22, 12, 12), headMat);
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.24, 12, 12), headMat);
     head.position.y = 1.7;
     head.castShadow = true;
     group.add(head);
@@ -406,9 +539,9 @@ class TacticalGame {
   setupWeaponModels() {
     this.gunMesh = new THREE.Group();
 
-    const metalMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.8, roughness: 0.3 });
+    const metalMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.85, roughness: 0.25 });
     const darkMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.7 });
-    const glowMat = new THREE.MeshBasicMaterial({ color: 0x3b82f6 });
+    const holoGlowMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
 
     // 1. Rifle Model (Slot 1)
     this.rifleMesh = new THREE.Group();
@@ -422,9 +555,14 @@ class TacticalGame {
     mag.position.set(0, -0.1, -0.05);
     mag.rotation.x = -0.2;
     this.rifleMesh.add(mag);
-    const sight = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.04, 0.08), glowMat);
-    sight.position.set(0, 0.06, 0.05);
-    this.rifleMesh.add(sight);
+
+    // Holo Sight with Reticle Glass
+    const sightFrame = new THREE.Mesh(new THREE.BoxGeometry(0.034, 0.045, 0.08), metalMat);
+    sightFrame.position.set(0, 0.065, 0.05);
+    this.rifleMesh.add(sightFrame);
+    const sightReticle = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.008, 0.002), holoGlowMat);
+    sightReticle.position.set(0, 0.065, 0.01);
+    this.rifleMesh.add(sightReticle);
 
     // 2. Pistol Model (Slot 2)
     this.pistolMesh = new THREE.Group();
@@ -440,18 +578,17 @@ class TacticalGame {
     this.gunMesh.add(this.pistolMesh);
 
     // Muzzle Flash
-    const flashGeo = new THREE.SphereGeometry(0.06, 8, 8);
+    const flashGeo = new THREE.SphereGeometry(0.07, 8, 8);
     const flashMat = new THREE.MeshBasicMaterial({ color: 0xffea00 });
     this.muzzleFlashMesh = new THREE.Mesh(flashGeo, flashMat);
     this.muzzleFlashMesh.position.set(0, 0.01, -0.52);
     this.muzzleFlashMesh.visible = false;
     this.gunMesh.add(this.muzzleFlashMesh);
 
-    this.muzzleLight = new THREE.PointLight(0xffea00, 0, 5);
+    this.muzzleLight = new THREE.PointLight(0xffea00, 0, 6);
     this.muzzleLight.position.set(0, 0.01, -0.52);
     this.gunMesh.add(this.muzzleLight);
 
-    this.gunDefaultPos = new THREE.Vector3(0.25, -0.22, -0.45);
     this.gunMesh.position.copy(this.gunDefaultPos);
     this.camera.add(this.gunMesh);
     this.scene.add(this.camera);
@@ -480,6 +617,20 @@ class TacticalGame {
       this.updateMovementKeys(keys);
     });
 
+    // Right-Click Aim Down Sights (ADS)
+    window.addEventListener('contextmenu', (e) => {
+      e.preventDefault(); // Prevent context menu
+    });
+
+    window.addEventListener('mousedown', (e) => {
+      audio.init();
+      if (e.button === 0 && this.isPointerLocked) {
+        this.fireWeapon();
+      } else if (e.button === 2 && this.isPointerLocked) {
+        this.toggleAim();
+      }
+    });
+
     this.container.addEventListener('click', () => {
       audio.init();
       if (!this.isPointerLocked && this.menuOverlay.classList.contains('hidden')) {
@@ -493,19 +644,29 @@ class TacticalGame {
 
     document.addEventListener('mousemove', (e) => {
       if (!this.isPointerLocked) return;
-      const sensitivity = 0.0022;
+      // Precision sensitivity: reduced in ADS for accurate micro-adjustments
+      const sensitivity = this.isAiming ? 0.0012 : 0.0022;
       this.yaw -= e.movementX * sensitivity;
       this.pitch -= e.movementY * sensitivity;
       this.pitch = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, this.pitch));
     });
 
-    window.addEventListener('mousedown', (e) => {
-      if (this.isPointerLocked && e.button === 0) {
-        this.fireWeapon();
-      }
-    });
-
     this.setupMobileTouch();
+  }
+
+  toggleAim(forceState = null) {
+    this.isAiming = forceState !== null ? forceState : !this.isAiming;
+    const crosshair = document.getElementById('crosshair');
+
+    if (this.isAiming) {
+      this.targetFov = 52;
+      this.targetGunPos = this.gunAdsPos;
+      crosshair.classList.add('ads');
+    } else {
+      this.targetFov = this.baseFov;
+      this.targetGunPos = this.gunDefaultPos;
+      crosshair.classList.remove('ads');
+    }
   }
 
   updateMovementKeys(keys) {
@@ -583,7 +744,7 @@ class TacticalGame {
       const dy = touch.clientY - this.lastTouchAimPos.y;
       this.lastTouchAimPos = { x: touch.clientX, y: touch.clientY };
 
-      const sensitivity = 0.005;
+      const sensitivity = this.isAiming ? 0.0028 : 0.005;
       this.yaw -= dx * sensitivity;
       this.pitch -= dy * sensitivity;
       this.pitch = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, this.pitch));
@@ -593,6 +754,7 @@ class TacticalGame {
 
     // Buttons
     document.getElementById('btn-fire').addEventListener('touchstart', (e) => { e.preventDefault(); this.fireWeapon(); });
+    document.getElementById('btn-aim').addEventListener('touchstart', (e) => { e.preventDefault(); this.toggleAim(); });
     document.getElementById('btn-switch-weapon').addEventListener('touchstart', (e) => {
       e.preventDefault();
       this.switchWeapon(this.currentSlot === 1 ? 2 : 1);
@@ -618,7 +780,6 @@ class TacticalGame {
       });
     });
 
-    // Mode Toggle (Solo vs Bots)
     document.getElementById('mode-solo').addEventListener('click', () => {
       this.gameMode = 'solo';
       document.getElementById('mode-solo').classList.add('active');
@@ -633,7 +794,6 @@ class TacticalGame {
       document.getElementById('bot-config-section').classList.remove('hidden');
     });
 
-    // Deploy Button
     document.getElementById('btn-start-solo').addEventListener('click', () => {
       audio.init();
       this.botCount = parseInt(document.getElementById('select-bot-count').value, 10);
@@ -656,7 +816,6 @@ class TacticalGame {
     if (this.isReloading || slot === this.currentSlot) return;
     this.currentSlot = slot;
 
-    // Toggle ViewModels
     if (slot === 1) {
       this.rifleMesh.visible = true;
       this.pistolMesh.visible = false;
@@ -677,25 +836,52 @@ class TacticalGame {
     audio.playReload();
   }
 
+  // --- Authentic 3D Segmented Frag Grenade ---
   throwGrenade() {
     if (this.grenadeCount <= 0) return;
     this.grenadeCount--;
     document.getElementById('grenade-count').innerText = `x${this.grenadeCount}`;
 
-    // Physical Grenade Mesh
-    const gGeo = new THREE.SphereGeometry(0.12, 12, 12);
-    const gMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.5 });
-    const grenade = new THREE.Mesh(gGeo, gMat);
-    grenade.position.copy(this.camera.position);
+    audio.playGrenadePin();
 
-    // Initial Velocity along camera vector
+    // High-detail 3D Pineapple Segmented Grenade
+    const grenadeGroup = new THREE.Group();
+
+    // Grooved olive body
+    const bodyMat = new THREE.MeshStandardMaterial({ color: 0x1e3a1e, roughness: 0.6, metalness: 0.3 });
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.22, 10), bodyMat);
+    grenadeGroup.add(body);
+
+    // Segmentation ridges
+    const ridgeMat = new THREE.MeshStandardMaterial({ color: 0x142814, roughness: 0.8 });
+    for (let r = -0.06; r <= 0.06; r += 0.04) {
+      const ridge = new THREE.Mesh(new THREE.TorusGeometry(0.125, 0.015, 6, 12), ridgeMat);
+      ridge.rotation.x = Math.PI / 2;
+      ridge.position.y = r;
+      grenadeGroup.add(ridge);
+    }
+
+    // Top fuse cap & silver lever (spoon)
+    const capMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.9, roughness: 0.2 });
+    const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.05, 0.06, 8), capMat);
+    cap.position.y = 0.14;
+    grenadeGroup.add(cap);
+
+    const lever = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.2, 0.04), capMat);
+    lever.position.set(0.1, 0.06, 0);
+    lever.rotation.z = -0.15;
+    grenadeGroup.add(lever);
+
+    // Initial position at player camera
+    grenadeGroup.position.copy(this.camera.position);
+
     const throwDir = new THREE.Vector3(0, 0, -1).applyEuler(this.camera.rotation);
-    const throwVel = throwDir.multiplyScalar(22);
-    throwVel.y += 4; // slight upward arc
+    const throwVel = throwDir.multiplyScalar(24);
+    throwVel.y += 4.5; // realistic ballistic throw arc
 
-    this.scene.add(grenade);
+    this.scene.add(grenadeGroup);
     this.grenades.push({
-      mesh: grenade,
+      mesh: grenadeGroup,
       velocity: throwVel,
       fuse: 2.2,
       exploded: false
@@ -705,7 +891,6 @@ class TacticalGame {
   }
 
   spawnTacticalBots() {
-    // Clear old bots
     this.bots.forEach(b => this.scene.remove(b.mesh));
     this.bots = [];
 
@@ -720,9 +905,15 @@ class TacticalGame {
       const botMesh = new THREE.Group();
       botMesh.position.copy(pos);
 
+      // Generous invisible hit cylinder for reliable hit registration
+      const hitBoxMat = new THREE.MeshBasicMaterial({ visible: false });
+      const hitBox = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 1.9, 8), hitBoxMat);
+      hitBox.position.y = 0.95;
+      botMesh.add(hitBox);
+
       // Red operative body
       const body = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.35, 0.35, 1.3, 12),
+        new THREE.CylinderGeometry(0.38, 0.38, 1.3, 12),
         new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.6 })
       );
       body.position.y = 0.9;
@@ -752,9 +943,7 @@ class TacticalGame {
         mesh: botMesh,
         health: 100,
         state: 'patrol',
-        targetPoint: new THREE.Vector3(pos.x + 5, 0, pos.y),
-        lastShotTime: 0,
-        burstCount: 0
+        lastShotTime: 0
       });
     }
   }
@@ -767,24 +956,14 @@ class TacticalGame {
 
       const distToPlayer = bot.mesh.position.distanceTo(this.camera.position);
 
-      // Perception check: Line of sight raycast
-      const botEye = bot.mesh.position.clone();
-      botEye.y += 1.6;
-      const toPlayer = this.camera.position.clone().sub(botEye).normalize();
-
-      // Bot rotates to face player when within 35m
       if (distToPlayer < 35) {
         bot.mesh.lookAt(this.camera.position.x, bot.mesh.position.y, this.camera.position.z);
 
-        // Engagement firing
         const now = this.clock.getElapsedTime();
         if (now - bot.lastShotTime > 0.8) {
           bot.lastShotTime = now;
-
-          // Controlled burst
           audio.playRifleShot();
 
-          // Bot accuracy based on difficulty
           let hitChance = 0.35;
           if (this.botDifficulty === 'regular') hitChance = 0.55;
           if (this.botDifficulty === 'veteran') hitChance = 0.75;
@@ -795,7 +974,6 @@ class TacticalGame {
           }
         }
       } else {
-        // Patrol sway
         bot.mesh.position.x += Math.sin(this.clock.getElapsedTime()) * 0.02;
       }
     });
@@ -806,16 +984,25 @@ class TacticalGame {
       const g = this.grenades[i];
       g.fuse -= delta;
 
-      // Apply physics
+      // Gravity and flight
       g.velocity.y -= 25 * delta;
       g.mesh.position.addScaledVector(g.velocity, delta);
+
+      // Gentle tumble rotation in air
+      g.mesh.rotation.x += 6 * delta;
+      g.mesh.rotation.z += 4 * delta;
 
       // Bounce on floor
       if (g.mesh.position.y <= 0.15) {
         g.mesh.position.y = 0.15;
-        g.velocity.y *= -0.4;
-        g.velocity.x *= 0.6;
-        g.velocity.z *= 0.6;
+        g.velocity.y *= -0.45;
+        g.velocity.x *= 0.65;
+        g.velocity.z *= 0.65;
+
+        // Audible metallic bounce
+        if (Math.abs(g.velocity.y) > 0.8) {
+          audio.playGrenadeBounce();
+        }
       }
 
       // Detonate
@@ -831,17 +1018,44 @@ class TacticalGame {
   detonateGrenade(pos) {
     audio.playExplosion();
 
-    // Shockwave expansion light
-    const shock = new THREE.PointLight(0xff6600, 8, 18);
+    // 1. Expanding Fireball Sphere
+    const fireGeo = new THREE.SphereGeometry(1.2, 16, 16);
+    const fireMat = new THREE.MeshBasicMaterial({ color: 0xff5500, transparent: true, opacity: 0.9 });
+    const fireball = new THREE.Mesh(fireGeo, fireMat);
+    fireball.position.copy(pos);
+    this.scene.add(fireball);
+
+    // 2. Shockwave light
+    const shock = new THREE.PointLight(0xff7700, 10, 20);
     shock.position.copy(pos);
     this.scene.add(shock);
-    setTimeout(() => this.scene.remove(shock), 150);
+
+    // 3. Ground Scorch Decal
+    const scorchGeo = new THREE.CircleGeometry(2.4, 24);
+    const scorchMat = new THREE.MeshBasicMaterial({ color: 0x05070a, side: THREE.DoubleSide });
+    const scorch = new THREE.Mesh(scorchGeo, scorchMat);
+    scorch.rotation.x = -Math.PI / 2;
+    scorch.position.set(pos.x, 0.02, pos.z);
+    this.scene.add(scorch);
+
+    // Animate fireball expansion and fade
+    let scale = 1.0;
+    const expandInterval = setInterval(() => {
+      scale += 0.35;
+      fireball.scale.set(scale, scale, scale);
+      fireball.material.opacity -= 0.07;
+      if (fireball.material.opacity <= 0) {
+        clearInterval(expandInterval);
+        this.scene.remove(fireball);
+        this.scene.remove(shock);
+      }
+    }, 30);
 
     // Damage checks within 8m blast radius
     const distToPlayer = this.camera.position.distanceTo(pos);
     if (distToPlayer < 8.0) {
       const falloff = 1.0 - (distToPlayer / 8.0);
-      this.takeDamage(Math.floor(90 * falloff));
+      this.takeDamage(Math.floor(95 * falloff));
     }
 
     // Damage bots
@@ -859,6 +1073,23 @@ class TacticalGame {
     });
   }
 
+  // --- High-Speed Visible Bullet Tracers ---
+  spawnBulletTracer(start, end) {
+    const distance = start.distanceTo(end);
+    const tracerGeo = new THREE.CylinderGeometry(0.015, 0.015, distance, 6);
+    tracerGeo.rotateX(Math.PI / 2);
+    const tracerMat = new THREE.MeshBasicMaterial({ color: 0xffea00, transparent: true, opacity: 0.85 });
+    const tracer = new THREE.Mesh(tracerGeo, tracerMat);
+
+    tracer.position.copy(start).lerp(end, 0.5);
+    tracer.lookAt(end);
+    this.scene.add(tracer);
+
+    setTimeout(() => {
+      this.scene.remove(tracer);
+    }, 55);
+  }
+
   startInteraction() {
     this.isInteracting = true;
   }
@@ -871,8 +1102,6 @@ class TacticalGame {
 
   updateObjective(delta) {
     const distToSite = this.camera.position.distanceTo(this.bombPosition);
-
-    // Show prompt when within 3.5m of Site A
     const prompt = document.getElementById('interaction-prompt');
     const promptText = document.getElementById('prompt-text');
 
@@ -881,7 +1110,7 @@ class TacticalGame {
       promptText.innerText = this.bombPlanted ? 'HOLD [E] TO DEFUSE DEVICE' : 'HOLD [E] TO PLANT DEVICE';
 
       if (this.isInteracting) {
-        this.interactionProgress += delta * 25; // 4 seconds to complete
+        this.interactionProgress += delta * 25;
         document.getElementById('interaction-progress').style.width = `${this.interactionProgress}%`;
 
         if (this.interactionProgress >= 100) {
@@ -907,7 +1136,6 @@ class TacticalGame {
       prompt.classList.add('hidden');
     }
 
-    // Bomb countdown
     if (this.bombPlanted) {
       this.bombTimeRemaining -= delta;
       document.getElementById('bomb-timer').innerText = `DETONATION IN ${Math.max(0, Math.ceil(this.bombTimeRemaining))}s`;
@@ -946,6 +1174,7 @@ class TacticalGame {
     }
   }
 
+  // --- High-Precision Authoritative Raycast Gunplay ---
   fireWeapon() {
     const cur = this.weapons[this.currentSlot];
     const now = this.clock.getElapsedTime();
@@ -965,53 +1194,99 @@ class TacticalGame {
 
     // Muzzle flash
     this.muzzleFlashMesh.visible = true;
-    this.muzzleLight.intensity = 4;
+    this.muzzleLight.intensity = 4.5;
     setTimeout(() => {
       this.muzzleFlashMesh.visible = false;
       this.muzzleLight.intensity = 0;
     }, 45);
 
-    // Recoil kick
+    // Viewmodel Recoil
     this.gunMesh.position.z += 0.05;
 
-    // Raycast hitscan trace
+    // Raycast hitscan trace with pinpoint screen center vector
     const raycaster = new THREE.Raycaster();
     raycaster.setFromCamera(new THREE.Vector2(0, 0), this.camera);
 
-    // Dummies
+    // Gun muzzle world position for tracer start
+    const muzzlePos = new THREE.Vector3();
+    this.muzzleFlashMesh.getWorldPosition(muzzlePos);
+
+    let targetHitPoint = raycaster.ray.origin.clone().add(raycaster.ray.direction.clone().multiplyScalar(60));
+
+    // 1. Check Practice Dummies
     const dummyHits = raycaster.intersectObjects(this.targetDummies, true);
     if (dummyHits.length > 0) {
-      this.showHitmarker();
-      audio.playHitSound();
+      const hit = dummyHits[0];
+      targetHitPoint = hit.point;
+
+      // Headshot check (y > 1.45 relative to dummy)
+      const hitObj = hit.object;
+      const rootDummy = hitObj.parent.userData.isDummy ? hitObj.parent : null;
+      if (rootDummy) {
+        const isHeadshot = hit.point.y - rootDummy.position.y > 1.45;
+        if (isHeadshot) {
+          audio.playHeadshotDink();
+          this.showHitmarker(true);
+        } else {
+          audio.playHitSound();
+          this.showHitmarker(false);
+        }
+      }
     }
 
-    // Bots
+    // 2. Check Tactical Bots with Headshot Differentiation
     this.bots.forEach(bot => {
       const hits = raycaster.intersectObject(bot.mesh, true);
       if (hits.length > 0) {
-        this.showHitmarker();
-        audio.playHitSound();
-        bot.health -= cur.damage;
+        const hit = hits[0];
+        targetHitPoint = hit.point;
+
+        const isHeadshot = hit.point.y - bot.mesh.position.y > 1.45;
+        const dealtDamage = isHeadshot ? cur.headDamage : cur.damage;
+
+        if (isHeadshot) {
+          audio.playHeadshotDink();
+          this.showHitmarker(true);
+        } else {
+          audio.playHitSound();
+          this.showHitmarker(false);
+        }
+
+        bot.health -= dealtDamage;
         if (bot.health <= 0) {
           this.scene.remove(bot.mesh);
           this.score++;
           document.getElementById('player-score').innerText = this.score;
-          this.addKillFeedMessage(`Eliminated ${bot.id}!`);
+          this.addKillFeedMessage(isHeadshot ? `HEADSHOT! Eliminated ${bot.id}!` : `Eliminated ${bot.id}!`);
         }
       }
     });
 
-    // Remote Players
+    // 3. Check Remote Multiplayer Players
     this.remotePlayers.forEach((player) => {
       const hits = raycaster.intersectObject(player.mesh, true);
       if (hits.length > 0) {
-        this.showHitmarker();
-        audio.playHitSound();
+        const hit = hits[0];
+        targetHitPoint = hit.point;
+        const isHeadshot = hit.point.y - player.mesh.position.y > 1.45;
+        const dealtDamage = isHeadshot ? cur.headDamage : cur.damage;
+
+        if (isHeadshot) {
+          audio.playHeadshotDink();
+          this.showHitmarker(true);
+        } else {
+          audio.playHitSound();
+          this.showHitmarker(false);
+        }
+
         if (this.conn && this.conn.open) {
-          this.conn.send({ type: 'damage', amount: cur.damage });
+          this.conn.send({ type: 'damage', amount: dealtDamage });
         }
       }
     });
+
+    // Spawn high-speed visible tracer
+    this.spawnBulletTracer(muzzlePos, targetHitPoint);
 
     if (this.conn && this.conn.open) {
       this.conn.send({
@@ -1022,14 +1297,22 @@ class TacticalGame {
     }
   }
 
-  showHitmarker() {
+  showHitmarker(isHeadshot = false) {
     const hm = document.getElementById('hitmarker');
     hm.classList.remove('hidden');
     hm.style.opacity = '1';
+
+    // Golden hitmarker for headshots
+    const lines = hm.querySelectorAll('.hm-line');
+    lines.forEach(l => {
+      l.style.background = isHeadshot ? '#fbbf24' : '#ef4444';
+      l.style.boxShadow = isHeadshot ? '0 0 6px #fbbf24' : '0 0 4px #ef4444';
+    });
+
     setTimeout(() => {
       hm.style.opacity = '0';
       setTimeout(() => hm.classList.add('hidden'), 150);
-    }, 80);
+    }, 90);
   }
 
   takeDamage(amount) {
@@ -1179,7 +1462,7 @@ class TacticalGame {
   createRemotePlayer(id) {
     const group = new THREE.Group();
     const bodyMat = new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.6 });
-    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 1.3, 12), bodyMat);
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 1.3, 12), bodyMat);
     body.position.y = 0.9;
     body.castShadow = true;
     group.add(body);
@@ -1257,15 +1540,26 @@ class TacticalGame {
     this.camera.rotation.y = this.yaw;
     this.camera.rotation.x = this.pitch;
 
-    // Viewmodel sway
+    // Smooth FOV transition for ADS (Zoom in/out)
+    if (Math.abs(this.camera.fov - this.targetFov) > 0.1) {
+      this.camera.fov += (this.targetFov - this.camera.fov) * 0.2;
+      this.camera.updateProjectionMatrix();
+    }
+
+    // Smooth Gun ADS Position Interpolation
+    this.gunMesh.position.lerp(this.targetGunPos, 0.2);
+
+    // Footstep audio cues while moving on ground
     const moveSpeed = Math.hypot(this.velocity.x, this.velocity.z);
-    if (moveSpeed > 0.5 && this.isOnGround) {
+    if (moveSpeed > 1.2 && this.isOnGround && this.stance !== 'walk') {
+      audio.playFootstep();
+    }
+
+    // Viewmodel sway (only when not in ADS)
+    if (!this.isAiming && moveSpeed > 0.5 && this.isOnGround) {
       const bobTime = this.clock.getElapsedTime() * 10;
-      this.gunMesh.position.x = this.gunDefaultPos.x + Math.sin(bobTime) * 0.008;
-      this.gunMesh.position.y = this.gunDefaultPos.y + Math.cos(bobTime * 2) * 0.008;
-    } else {
-      this.gunMesh.position.lerp(this.gunDefaultPos, 0.1);
-      this.gunMesh.rotation.set(0, 0, 0);
+      this.gunMesh.position.x += Math.sin(bobTime) * 0.003;
+      this.gunMesh.position.y += Math.cos(bobTime * 2) * 0.003;
     }
 
     if (this.conn && this.conn.open && Math.random() < 0.5) {
