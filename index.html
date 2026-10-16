@@ -51,8 +51,40 @@
       </div>
     </header>
 
+    <!-- Objective Status & Interaction Prompt -->
+    <div id="objective-banner" class="objective-banner hidden">
+      <div class="objective-title">TACTICAL DEVICE PLANTED</div>
+      <div class="objective-timer" id="bomb-timer">DETONATION IN 45s</div>
+    </div>
+
+    <!-- Contextual Interaction Prompt (Plant / Defuse) -->
+    <div id="interaction-prompt" class="interaction-prompt hidden">
+      <span class="key-pill">E</span>
+      <span id="prompt-text">HOLD TO DEFUSE DEVICE</span>
+      <div class="interaction-bar-wrap">
+        <div id="interaction-progress" class="interaction-bar"></div>
+      </div>
+    </div>
+
     <!-- Kill Feed -->
     <div id="kill-feed"></div>
+
+    <!-- Weapon Inventory Strip -->
+    <div class="inventory-strip">
+      <div id="slot-primary" class="inv-slot active">
+        <span class="slot-num">1</span>
+        <span class="slot-name">AR-556</span>
+      </div>
+      <div id="slot-secondary" class="inv-slot">
+        <span class="slot-num">2</span>
+        <span class="slot-name">P-900</span>
+      </div>
+      <div id="slot-utility" class="inv-slot">
+        <span class="slot-num">3</span>
+        <span class="slot-name">GRENADE</span>
+        <span id="grenade-count" class="slot-qty">x2</span>
+      </div>
+    </div>
 
     <!-- Bottom Gameplay Status -->
     <footer class="game-footer">
@@ -74,7 +106,7 @@
 
       <div class="status-panel ammo-panel">
         <div class="ammo-details">
-          <span class="panel-label">TACTICAL AR-556</span>
+          <span id="weapon-name-display" class="panel-label">TACTICAL AR-556</span>
           <div class="ammo-counts">
             <span id="ammo-clip" class="stat-value">30</span>
             <span class="ammo-slash">/</span>
@@ -101,9 +133,12 @@
       <!-- Action Buttons -->
       <div class="mobile-action-buttons">
         <button id="btn-fire" class="mobile-btn btn-shoot" aria-label="Shoot">FIRE</button>
+        <button id="btn-switch-weapon" class="mobile-btn btn-sm" aria-label="Switch Weapon">GUN</button>
+        <button id="btn-grenade" class="mobile-btn btn-sm" aria-label="Throw Grenade">GRENADE</button>
         <button id="btn-reload" class="mobile-btn btn-sm" aria-label="Reload">R</button>
         <button id="btn-jump" class="mobile-btn btn-sm" aria-label="Jump">JUMP</button>
         <button id="btn-crouch" class="mobile-btn btn-sm" aria-label="Crouch">CROUCH</button>
+        <button id="btn-interact" class="mobile-btn btn-sm btn-action" aria-label="Interact / Defuse">DEFUSE</button>
       </div>
     </div>
   </div>
@@ -113,7 +148,7 @@
     <div class="menu-card">
       <div class="card-glow"></div>
       <div class="menu-brand">
-        <div class="brand-tag">TACTICAL SHOOTER</div>
+        <div class="brand-tag">TACTICAL SHOOTER V2</div>
         <h1>TACTICAL STRIKE</h1>
         <p class="subtitle">Closed-Source Lightweight 3D Tactical FPS</p>
       </div>
@@ -125,9 +160,37 @@
       </div>
 
       <div id="tab-content-play" class="tab-content active">
-        <button id="btn-start-solo" class="action-btn primary-btn">
-          <span class="btn-text">ENTER COMBAT GYM</span>
-          <span class="btn-sub">Practice with target dummies and tactical obstacles</span>
+        <div class="play-options">
+          <label class="opt-label">COMBAT MODE</label>
+          <div class="mode-selector">
+            <button id="mode-solo" class="mode-pill active">DUMMY RANGE</button>
+            <button id="mode-bots" class="mode-pill">TACTICAL BOTS</button>
+          </div>
+
+          <div id="bot-config-section" class="bot-config hidden">
+            <div class="config-row">
+              <label>BOT COUNT:</label>
+              <select id="select-bot-count" class="t-select">
+                <option value="1">1 Tactical Bot</option>
+                <option value="2" selected>2 Tactical Bots</option>
+                <option value="3">3 Tactical Bots</option>
+              </select>
+            </div>
+            <div class="config-row">
+              <label>DIFFICULTY:</label>
+              <select id="select-difficulty" class="t-select">
+                <option value="recruit">Recruit (Easy)</option>
+                <option value="regular" selected>Regular (Medium)</option>
+                <option value="veteran">Veteran (Hard)</option>
+                <option value="elite">Elite (Competitive)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <button id="btn-start-solo" class="action-btn primary-btn mt-4">
+          <span class="btn-text">DEPLOY TO ARENA</span>
+          <span class="btn-sub">Engage in tactical CQB combat</span>
         </button>
       </div>
 
@@ -163,6 +226,9 @@
           <div class="ctrl-row"><span>WASD</span><strong>Move / Strafe</strong></div>
           <div class="ctrl-row"><span>Mouse</span><strong>Aim & Look</strong></div>
           <div class="ctrl-row"><span>Left Click</span><strong>Fire Weapon</strong></div>
+          <div class="ctrl-row"><span>1 / 2</span><strong>Primary AR / Secondary Pistol</strong></div>
+          <div class="ctrl-row"><span>G / 3</span><strong>Throw Frag Grenade</strong></div>
+          <div class="ctrl-row"><span>E</span><strong>Plant / Defuse Device</strong></div>
           <div class="ctrl-row"><span>R</span><strong>Reload Magazine</strong></div>
           <div class="ctrl-row"><span>Space</span><strong>Jump</strong></div>
           <div class="ctrl-row"><span>C / Ctrl</span><strong>Crouch</strong></div>
@@ -173,7 +239,7 @@
 
       <div class="menu-footer">
         <span>Cross-platform: Windows PC & Android APK</span>
-        <span id="version-tag">v1.0.0-p2p</span>
+        <span id="version-tag">v2.0.0-tactical</span>
       </div>
     </div>
   </div>

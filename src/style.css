@@ -726,3 +726,209 @@ canvas {
   from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* ==========================================================================
+   Project V2 Tactical Additions: Weapon Inventory, Objective & Bots
+   ========================================================================== */
+
+/* Objective Banner */
+.objective-banner {
+  position: absolute;
+  top: 75px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(185, 28, 28, 0.85);
+  border: 1px solid #ef4444;
+  padding: 8px 24px;
+  border-radius: 6px;
+  text-align: center;
+  box-shadow: 0 0 25px rgba(239, 68, 68, 0.5);
+  animation: pulseWarning 1s infinite alternate;
+}
+
+.objective-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: #fecaca;
+}
+
+.objective-timer {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+}
+
+@keyframes pulseWarning {
+  from { opacity: 0.85; transform: translateX(-50%) scale(1); }
+  to { opacity: 1; transform: translateX(-50%) scale(1.03); }
+}
+
+/* Interaction Prompt (Hold E to Plant/Defuse) */
+.interaction-prompt {
+  position: absolute;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(8px);
+  padding: 10px 20px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.key-pill {
+  background: var(--tactical-gold);
+  color: #000;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+#prompt-text {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.interaction-bar-wrap {
+  width: 160px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.interaction-bar {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  transition: width 0.05s linear;
+}
+
+/* Inventory Strip (Slots 1, 2, 3) */
+.inventory-strip {
+  position: absolute;
+  bottom: 95px;
+  right: 24px;
+  display: flex;
+  gap: 8px;
+}
+
+.inv-slot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  transition: all 0.2s;
+}
+
+.inv-slot.active {
+  background: rgba(59, 130, 246, 0.25);
+  border-color: var(--primary-accent);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+}
+
+.slot-num {
+  font-size: 11px;
+  color: var(--tactical-gold);
+}
+
+.slot-qty {
+  font-size: 10px;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+/* Play Options & Bot Setup */
+.play-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.opt-label {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+}
+
+.mode-selector {
+  display: flex;
+  gap: 10px;
+}
+
+.mode-pill {
+  flex: 1;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(30, 41, 59, 0.6);
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mode-pill.active {
+  background: rgba(59, 130, 246, 0.3);
+  border-color: var(--primary-accent);
+  color: #fff;
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
+}
+
+.bot-config {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: rgba(30, 41, 59, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.config-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.t-select {
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  outline: none;
+}
+
+.mt-4 { margin-top: 16px; }
+.btn-action { background: #d97706 !important; }
+
