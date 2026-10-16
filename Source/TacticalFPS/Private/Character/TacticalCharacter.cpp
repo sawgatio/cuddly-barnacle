@@ -7,11 +7,18 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "InputMappingContext.h"
+#include "Engine/CollisionProfile.h"
+#include "Net/UnrealNetwork.h"
 #include "GameFramework/PlayerController.h"
 
 ATacticalCharacter::ATacticalCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	// Enable Multiplayer Network Replication
+	bReplicates = true;
+	SetReplicateMovement(true);
 
 	// 1. Setup Capsule Dimensions
 	// Standard tactical FPS geometry: 38cm radius, 92cm half-height (fits 100cm doorways)
@@ -19,7 +26,7 @@ ATacticalCharacter::ATacticalCharacter()
 	GetCapsuleComponent()->SetCollisionProfileName(UCollisionProfile::Pawn_ProfileName);
 
 	// 2. Setup First Person Camera
-	// Placed at eye level (~165 cm above base: 92cm half-height + 64cm camera offset = ~156cm eye level)
+	// Placed at eye level (~156 cm above ground: 92cm capsule half-height + 64cm offset)
 	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
 	FirstPersonCameraComponent->SetupAttachment(GetCapsuleComponent());
 	FirstPersonCameraComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 64.0f));
@@ -54,7 +61,7 @@ ATacticalCharacter::ATacticalCharacter()
 
 	// Enable Crouch
 	MoveComp->GetNavAgentPropertiesRef().bCanCrouch = true;
-	MoveComp->SetCrouchedHalfHeight(60.0f);
+	MoveComp->CrouchedHalfHeight = 60.0f;
 
 	// Stance & Input Defaults
 	CurrentStance = ETacticalStance::Standing;
@@ -67,7 +74,7 @@ void ATacticalCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Add Input Mapping Context to Enhanced Input Subsystem
+	// Add Input Mapping Context to Enhanced Input Subsystem for local players
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
@@ -81,39 +88,47 @@ void ATacticalCharacter::BeginPlay()
 	}
 }
 
+void ATacticalCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	// Replicate CurrentStance to all clients for animations and hitboxes
+	DOREPLIFETIME(ATacticalCharacter, CurrentStance);
+}
+
 void ATacticalCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		// Moving (WASD)
+		// Moving (WASD / Mobile Left Virtual Joystick)
 		if (MoveAction)
 		{
 			EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ATacticalCharacter::Move);
 		}
 
-		// Looking (Mouse X / Y)
+		// Looking (Mouse / Mobile Right Touch Drag)
 		if (LookAction)
 		{
 			EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ATacticalCharacter::Look);
 		}
 
-		// Jumping (Space)
+		// Jumping (Space / Touch Button)
 		if (JumpAction)
 		{
 			EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ATacticalCharacter::StartJump);
 			EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ATacticalCharacter::StopJump);
 		}
 
-		// Crouching (Ctrl)
+		// Crouching (Ctrl / Touch Button)
 		if (CrouchAction)
 		{
 			EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Started, this, &ATacticalCharacter::StartCrouch);
 			EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &ATacticalCharacter::StopCrouch);
 		}
 
-		// Tactical Walk (Shift)
+		// Tactical Walk (Shift / Touch Button)
 		if (WalkAction)
 		{
 			EnhancedInputComponent->BindAction(WalkAction, ETriggerEvent::Started, this, &ATacticalCharacter::StartWalk);
@@ -157,7 +172,6 @@ void ATacticalCharacter::Look(const FInputActionValue& Value)
 
 void ATacticalCharacter::StartJump()
 {
-	// Prevent jumping while crouched
 	if (!bIsCrouched)
 	{
 		Jump();
@@ -174,6 +188,11 @@ void ATacticalCharacter::StartCrouch()
 	Crouch();
 	CurrentStance = ETacticalStance::Crouching;
 	UpdateMovementSpeed();
+
+	if (!HasAuthority())
+	{
+		Server_StartCrouch();
+	}
 }
 
 void ATacticalCharacter::StopCrouch()
@@ -181,6 +200,11 @@ void ATacticalCharacter::StopCrouch()
 	UnCrouch();
 	CurrentStance = bWantsToWalk ? ETacticalStance::Walking : ETacticalStance::Standing;
 	UpdateMovementSpeed();
+
+	if (!HasAuthority())
+	{
+		Server_StopCrouch();
+	}
 }
 
 void ATacticalCharacter::StartWalk()
@@ -191,6 +215,11 @@ void ATacticalCharacter::StartWalk()
 		CurrentStance = ETacticalStance::Walking;
 		UpdateMovementSpeed();
 	}
+
+	if (!HasAuthority())
+	{
+		Server_StartWalk();
+	}
 }
 
 void ATacticalCharacter::StopWalk()
@@ -200,6 +229,11 @@ void ATacticalCharacter::StopWalk()
 	{
 		CurrentStance = ETacticalStance::Standing;
 		UpdateMovementSpeed();
+	}
+
+	if (!HasAuthority())
+	{
+		Server_StopWalk();
 	}
 }
 
@@ -221,4 +255,30 @@ void ATacticalCharacter::UpdateMovementSpeed()
 		MoveComp->MaxWalkSpeed = StandingSpeed;
 		break;
 	}
+}
+
+void ATacticalCharacter::OnRep_CurrentStance()
+{
+	// Simulated proxy callback when stance changes over network
+	UpdateMovementSpeed();
+}
+
+void ATacticalCharacter::Server_StartCrouch_Implementation()
+{
+	StartCrouch();
+}
+
+void ATacticalCharacter::Server_StopCrouch_Implementation()
+{
+	StopCrouch();
+}
+
+void ATacticalCharacter::Server_StartWalk_Implementation()
+{
+	StartWalk();
+}
+
+void ATacticalCharacter::Server_StopWalk_Implementation()
+{
+	StopWalk();
 }

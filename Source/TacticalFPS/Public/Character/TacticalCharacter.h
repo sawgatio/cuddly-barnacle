@@ -37,11 +37,12 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	/** Called for movement input (WASD) */
+	/** Called for movement input (WASD / Left Virtual Joystick) */
 	void Move(const FInputActionValue& Value);
 
-	/** Called for look input (Mouse X / Y) */
+	/** Called for look input (Mouse / Right Touch Drag) */
 	void Look(const FInputActionValue& Value);
 
 	/** Jump handlers */
@@ -59,12 +60,29 @@ protected:
 	/** Recomputes current max speed based on stance */
 	void UpdateMovementSpeed();
 
+	/** Network Server RPCs for multiplayer replication */
+	UFUNCTION(Server, Reliable)
+	void Server_StartCrouch();
+
+	UFUNCTION(Server, Reliable)
+	void Server_StopCrouch();
+
+	UFUNCTION(Server, Reliable)
+	void Server_StartWalk();
+
+	UFUNCTION(Server, Reliable)
+	void Server_StopWalk();
+
+	/** Replication notify for stance updates on simulated proxies */
+	UFUNCTION()
+	void OnRep_CurrentStance();
+
 public:
 	/** Returns the first person camera subobject */
 	FORCEINLINE UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
-	/** Current movement stance */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Tactical|Movement")
+	/** Current movement stance (Replicated to all clients) */
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentStance, VisibleAnywhere, BlueprintReadOnly, Category = "Tactical|Movement")
 	ETacticalStance CurrentStance;
 
 	/** Stance movement speed configurations (uu/s) derived from RESEARCH.md */
@@ -77,7 +95,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tactical|Movement")
 	float CrouchingSpeed;
 
-	/** Mouse sensitivity multipliers */
+	/** Mouse / Touch sensitivity multipliers */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tactical|Input")
 	float MouseSensitivityYaw;
 

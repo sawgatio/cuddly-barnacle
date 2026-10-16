@@ -7,7 +7,7 @@
 #include "TacticalGameMode.generated.h"
 
 /**
- * Base game mode for Project Tactical Strike
+ * Base game mode for Project Tactical Strike supporting multiplayer sessions
  */
 UCLASS()
 class TACTICALFPS_API ATacticalGameMode : public AGameModeBase
@@ -16,4 +16,6 @@ class TACTICALFPS_API ATacticalGameMode : public AGameModeBase
 
 public:
 	ATacticalGameMode();
+
+	virtual void PostLogin(APlayerController* NewPlayer) override;
 };
