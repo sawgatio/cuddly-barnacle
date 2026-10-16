@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Tactical Strike - 3D Multiplayer FPS</title>
+  <link rel="stylesheet" href="/src/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- 3D Canvas Container -->
+  <div id="game-container"></div>
+
+  <!-- HUD Interface -->
+  <div id="hud" class="hidden">
+    <!-- Crosshair -->
+    <div id="crosshair">
+      <div class="ch-line ch-top"></div>
+      <div class="ch-line ch-bottom"></div>
+      <div class="ch-line ch-left"></div>
+      <div class="ch-line ch-right"></div>
+      <div class="ch-dot"></div>
+    </div>
+
+    <!-- Hitmarker overlay -->
+    <div id="hitmarker" class="hidden">
+      <div class="hm-line hm-1"></div>
+      <div class="hm-line hm-2"></div>
+      <div class="hm-line hm-3"></div>
+      <div class="hm-line hm-4"></div>
+    </div>
+
+    <!-- Red damage flash vignette -->
+    <div id="damage-vignette"></div>
+
+    <!-- Top Match Header -->
+    <header class="match-header">
+      <div class="team-score blue-team">
+        <span class="team-label">YOU</span>
+        <span id="player-score" class="score-num">0</span>
+      </div>
+      <div class="round-timer-box">
+        <span id="match-timer">02:15</span>
+        <span id="room-badge" class="room-pill">SOLO PRACTICE</span>
+      </div>
+      <div class="team-score red-team">
+        <span class="team-label">ENEMY</span>
+        <span id="enemy-score" class="score-num">0</span>
+      </div>
+    </header>
+
+    <!-- Kill Feed -->
+    <div id="kill-feed"></div>
+
+    <!-- Bottom Gameplay Status -->
+    <footer class="game-footer">
+      <div class="status-panel health-panel">
+        <div class="panel-icon">+</div>
+        <div class="panel-details">
+          <span class="panel-label">HEALTH</span>
+          <div class="bar-container">
+            <div id="health-bar" style="width: 100%;"></div>
+          </div>
+          <span id="health-text" class="stat-value">100</span>
+        </div>
+      </div>
+
+      <div class="status-panel stance-panel">
+        <span id="stance-indicator" class="stance-badge">STAND</span>
+        <span id="ping-indicator" class="ping-badge">P2P DIRECT</span>
+      </div>
+
+      <div class="status-panel ammo-panel">
+        <div class="ammo-details">
+          <span class="panel-label">TACTICAL AR-556</span>
+          <div class="ammo-counts">
+            <span id="ammo-clip" class="stat-value">30</span>
+            <span class="ammo-slash">/</span>
+            <span id="ammo-reserve">90</span>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Mobile Virtual Touch Controls (Visible on mobile/touch) -->
+    <div id="mobile-controls">
+      <!-- Left Joystick for WASD Movement -->
+      <div id="joystick-zone">
+        <div id="joystick-base">
+          <div id="joystick-thumb"></div>
+        </div>
+      </div>
+
+      <!-- Right Touch Aim Area -->
+      <div id="touch-aim-zone">
+        <span class="aim-hint">SWIPE TO AIM</span>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="mobile-action-buttons">
+        <button id="btn-fire" class="mobile-btn btn-shoot" aria-label="Shoot">FIRE</button>
+        <button id="btn-reload" class="mobile-btn btn-sm" aria-label="Reload">R</button>
+        <button id="btn-jump" class="mobile-btn btn-sm" aria-label="Jump">JUMP</button>
+        <button id="btn-crouch" class="mobile-btn btn-sm" aria-label="Crouch">CROUCH</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Menu / Multiplayer Lobby Modal -->
+  <div id="menu-overlay">
+    <div class="menu-card">
+      <div class="card-glow"></div>
+      <div class="menu-brand">
+        <div class="brand-tag">TACTICAL SHOOTER</div>
+        <h1>TACTICAL STRIKE</h1>
+        <p class="subtitle">Closed-Source Lightweight 3D Tactical FPS</p>
+      </div>
+
+      <div class="menu-tabs">
+        <button id="tab-play" class="tab-btn active">PLAY</button>
+        <button id="tab-multiplayer" class="tab-btn">MULTIPLAYER</button>
+        <button id="tab-controls" class="tab-btn">CONTROLS</button>
+      </div>
+
+      <div id="tab-content-play" class="tab-content active">
+        <button id="btn-start-solo" class="action-btn primary-btn">
+          <span class="btn-text">ENTER COMBAT GYM</span>
+          <span class="btn-sub">Practice with target dummies and tactical obstacles</span>
+        </button>
+      </div>
+
+      <div id="tab-content-multiplayer" class="tab-content">
+        <div class="p2p-box">
+          <div class="p2p-section">
+            <h3>HOST A ROOM</h3>
+            <p>Generate a room code and invite your friend to join.</p>
+            <button id="btn-host-room" class="action-btn secondary-btn">CREATE ROOM</button>
+            <div id="host-code-display" class="code-box hidden">
+              <span>ROOM CODE:</span>
+              <strong id="generated-room-code">---</strong>
+              <button id="btn-copy-code" class="chip-btn">COPY</button>
+            </div>
+          </div>
+
+          <div class="p2p-divider">OR</div>
+
+          <div class="p2p-section">
+            <h3>JOIN A ROOM</h3>
+            <p>Enter the code shared by your friend.</p>
+            <div class="input-row">
+              <input type="text" id="join-room-input" placeholder="e.g. STRIKE-982" maxlength="15">
+              <button id="btn-join-room" class="action-btn primary-btn sm-btn">JOIN</button>
+            </div>
+          </div>
+        </div>
+        <div id="connection-status" class="status-msg"></div>
+      </div>
+
+      <div id="tab-content-controls" class="tab-content">
+        <div class="controls-grid">
+          <div class="ctrl-row"><span>WASD</span><strong>Move / Strafe</strong></div>
+          <div class="ctrl-row"><span>Mouse</span><strong>Aim & Look</strong></div>
+          <div class="ctrl-row"><span>Left Click</span><strong>Fire Weapon</strong></div>
+          <div class="ctrl-row"><span>R</span><strong>Reload Magazine</strong></div>
+          <div class="ctrl-row"><span>Space</span><strong>Jump</strong></div>
+          <div class="ctrl-row"><span>C / Ctrl</span><strong>Crouch</strong></div>
+          <div class="ctrl-row"><span>Shift</span><strong>Tactical Walk (Silent)</strong></div>
+          <div class="ctrl-row"><span>Touch Screen</span><strong>Virtual Joysticks & Buttons</strong></div>
+        </div>
+      </div>
+
+      <div class="menu-footer">
+        <span>Cross-platform: Windows PC & Android APK</span>
+        <span id="version-tag">v1.0.0-p2p</span>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

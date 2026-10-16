@@ -1,0 +1,21 @@
+{
+  "name": "tactical-strike-fps",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tactical FPS - Lightweight 3D Multiplayer First-Person Shooter for PC & Android",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "^0.160.0",
+    "peerjs": "^1.5.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^5.7.0",
+    "@capacitor/core": "^5.7.0",
+    "@capacitor/android": "^5.7.0",
+    "vite": "^5.0.12"
+  }
+}

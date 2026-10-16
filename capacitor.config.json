@@ -1,0 +1,8 @@
+{
+  "appId": "com.closedsource.tacticalfps",
+  "appName": "Tactical Strike",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
+}

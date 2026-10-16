@@ -33,3 +33,17 @@ Saved/Config/WindowsNoEditor/
 # Backup files
 *.bak
 *.tmp
+
+# Web & Node dependencies
+node_modules/
+dist/
+release-output/
+
+# Android local build artifacts
+.gradle/
+android/.gradle/
+android/app/build/
+android/build/
+android/captures/
+android/.idea/
+
