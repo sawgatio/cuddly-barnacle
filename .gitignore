@@ -1,0 +1,35 @@
+# Unreal Engine .gitignore
+
+# Visual Studio / Rider files
+.vs/
+.idea/
+*.sln
+*.suo
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+
+# Compiled binaries and intermediate files
+Binaries/
+Intermediate/
+DerivedDataCache/
+Saved/
+Build/
+
+# Package builds
+Packages/
+*.apk
+*.ipa
+
+# Crash reports and logs
+Saved/Logs/
+Saved/Crashes/
+
+# Unreal Engine user settings
+Saved/Config/WindowsEditor/
+Saved/Config/WindowsNoEditor/
+
+# Backup files
+*.bak
+*.tmp
